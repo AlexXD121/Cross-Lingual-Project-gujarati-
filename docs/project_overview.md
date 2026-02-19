@@ -112,7 +112,7 @@ if user_corrects_response or confidence < THRESHOLD:
 | Data versioning | `DVC` |
 | Containerization | `Docker` |
 
-### Data Collection (done ✅)
+### Data Collection
 | Tool | Purpose |
 |---|---|
 | `yt-dlp` | YouTube video discovery |
@@ -202,14 +202,14 @@ if user_corrects_response or confidence < THRESHOLD:
 
 | Phase | Goal | Status |
 |---|---|---|
-| **Phase 1** | Data collection & balancing | ✅ Done |
-| **Phase 2** | Dialect classifier (MuRIL) | 🔜 Next |
-| **Phase 3** | RAG pipeline (FAISS + embeddings) | 🔜 Planned |
-| **Phase 4** | ASR fine-tuning (Whisper) | 🔜 Planned |
-| **Phase 5** | LLM + RAG integration | 🔜 Planned |
-| **Phase 6** | Self-learning loop | 🔜 Planned |
-| **Phase 7** | TTS integration | 🔜 Planned |
-| **Phase 8** | FastAPI backend + Frontend | 🔜 Planned |
+| 1 | Data collection and balancing | Done |
+| 2 | Dialect classifier (MuRIL) | Next |
+| 3 | RAG pipeline (FAISS + embeddings) | Planned |
+| 4 | ASR fine-tuning (Whisper) | Planned |
+| 5 | LLM + RAG integration | Planned |
+| 6 | Self-learning loop | Planned |
+| 7 | TTS integration | Planned |
+| 8 | FastAPI backend + frontend | Planned |
 
 ---
 

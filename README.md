@@ -1,182 +1,152 @@
-# 🗣️ Gujarati Cross-Lingual Voice Assistant
+# Gujarati Cross-Lingual Voice Assistant
 
-> A dialect-aware voice AI that understands regional Gujarati dialects, processes speech intelligently using RAG + LLM, and responds in voice or text. The model learns from its own mistakes continuously.
+A dialect-aware voice AI that understands regional Gujarati dialects, processes speech using RAG + LLM, and responds in voice or text. The model continuously learns from its own mistakes.
 
 ---
 
-## 🔁 System Flow
+## System Flow
 
 ```mermaid
 flowchart TD
-    A([🎙️ User speaks\nin any Gujarati dialect]) --> B
+    A([User speaks in any Gujarati dialect]) --> B
 
-    subgraph ASR["🔊 ASR — Speech to Text"]
+    subgraph ASR["ASR — Speech to Text"]
         B[Whisper / Wav2Vec2\nfine-tuned on 4 dialects]
     end
 
     B --> C
 
-    subgraph NLU["🧠 NLU — Language Understanding"]
+    subgraph NLU["NLU — Language Understanding"]
         C[Dialect Identifier\nIndicBERT / MuRIL] --> D
-        D[Intent + Entity\nExtraction]
+        D[Intent + Entity Extraction]
     end
 
     D --> E
 
-    subgraph RAG["📚 RAG — Retrieval Augmented Generation"]
+    subgraph RAG["RAG — Retrieval Augmented Generation"]
         E[Query Vector Store\nFAISS / ChromaDB] --> F
-        F[Retrieve relevant\ndialect context chunks] --> G
-        G[Inject context\ninto LLM prompt]
+        F[Retrieve relevant dialect context] --> G
+        G[Inject context into LLM prompt]
     end
 
     G --> H
 
-    subgraph LLM["💡 AI Brain — Response Generation"]
+    subgraph LLM["AI Brain — Response Generation"]
         H[IndicBERT / LLaMA\nfine-tuned on Gujarati] --> I
-        I[Generate response\nin Standard Gujarati]
+        I[Generate response]
     end
 
     I --> J
 
-    subgraph FEEDBACK["🔄 Self-Learning Loop"]
-        J{User\nfeedback?}
-        J -- Correction / Low confidence --> K[Log mistake\nto error store]
-        K --> L[Auto-add to\nRAG vector store]
-        L --> M[Re-embed &\nupdate knowledge base]
+    subgraph FEEDBACK["Self-Learning Loop"]
+        J{User feedback?}
+        J -- Correction / Low confidence --> K[Log mistake to error store]
+        K --> L[Add to RAG vector store]
+        L --> M[Re-embed and update knowledge base]
         M --> E
     end
 
     J -- Accepted --> N
 
-    subgraph TTS["🔈 TTS — Text to Speech"]
-        N[Coqui TTS /\nIndicTTS Gujarati voice]
+    subgraph TTS["TTS — Text to Speech"]
+        N[Coqui TTS / IndicTTS Gujarati]
     end
 
-    N --> O([📢 User receives\nspeech or text response])
-
-    style ASR fill:#1e3a5f,color:#fff
-    style NLU fill:#2d5016,color:#fff
-    style RAG fill:#5c2d00,color:#fff
-    style LLM fill:#3d1a5f,color:#fff
-    style FEEDBACK fill:#5f1a1a,color:#fff
-    style TTS fill:#1a4a4a,color:#fff
+    N --> O([User receives speech or text response])
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-| Layer | Tool | Purpose |
+| Layer | Tool | Notes |
 |---|---|---|
-| **ASR** | `openai/whisper-small` | Speech → text, fine-tuned on Gujarati dialects |
-| **ASR alt** | `facebook/wav2vec2-base` | Alternate ASR backbone |
-| **Dialect ID** | `google/muril-base-cased` | Classify which dialect (Surti/Kathiawari etc.) |
-| **Embeddings** | `sentence-transformers` | Encode text for RAG vector store |
-| **Vector DB** | `FAISS` / `ChromaDB` | Store & retrieve dialect knowledge chunks |
-| **LLM** | `ai4bharat/IndicBERT` | Core language understanding & generation |
-| **LLM alt** | `LLaMA 3 (fine-tuned)` | Larger model for generation tasks |
-| **TTS** | `Coqui TTS` / `IndicTTS` | Text → Gujarati speech |
-| **Backend** | `FastAPI` (Python) | REST API for the pipeline |
-| **Frontend** | `React` / `Next.js` | Web UI or mobile app |
-| **Experiment tracking** | `MLflow` / `W&B` | Track model training runs |
-| **Data** | `yt-dlp` + `youtube-comment-downloader` | Dialect data scraping |
+| ASR | `openai/whisper-small` | Fine-tuned on Gujarati dialect audio |
+| ASR (alt) | `facebook/wav2vec2-base` | Lower latency option |
+| Dialect ID | `google/muril-base-cased` | 17 Indian languages pretrained |
+| Embeddings | `sentence-transformers` | Multilingual, Gujarati-aware |
+| Vector DB | `FAISS` / `ChromaDB` | Local and persistent RAG retrieval |
+| LLM | `ai4bharat/indic-gpt` / `LLaMA-3-8B` | Response generation |
+| TTS | `Coqui TTS` / `IndicTTS` | Gujarati speech synthesis |
+| Backend | `FastAPI` | REST API for the pipeline |
+| Frontend | `React` / `Next.js` | Web UI |
+| Tracking | `MLflow` / `W&B` | Experiment tracking |
+| Data | `yt-dlp` + `youtube-comment-downloader` | Dialect data collection |
 
 ---
 
-## 📚 RAG Implementation
+## RAG
 
-The model does **not** just rely on its weights — it retrieves real dialect knowledge at inference time.
+The model retrieves real dialect context at inference time rather than relying solely on trained weights.
 
 ```
 User query
-    ↓
-Embed query using sentence-transformers
-    ↓
-Search FAISS/ChromaDB for top-k similar dialect chunks
-    ↓
-Inject retrieved context → LLM prompt
-    ↓
-LLM generates a context-grounded answer
+  -> embed with sentence-transformers
+  -> search FAISS/ChromaDB for top-k dialect chunks
+  -> inject retrieved context into LLM prompt
+  -> LLM generates a grounded answer
 ```
 
-**RAG knowledge base contains:**
-- Dialect sentence examples (from our 2000 balanced rows)
-- Dialect vocabulary mappings (Surti ↔ Standard Gujarati)
-- Common corrections from the self-learning store
+The RAG knowledge base includes the 2,000 balanced dialect sentences, dialect vocabulary mappings, and corrections accumulated through the self-learning loop.
 
 ---
 
-## 🔄 Self-Learning from Mistakes
+## Self-Learning from Mistakes
 
-When the model gets something wrong, it doesn't just fail — it learns:
+When the model produces a low-confidence or incorrect output, it logs the mistake and immediately updates the RAG store — no full retraining required.
 
 ```
 Low confidence or user correction
-    ↓
-Error logged to mistake_store.json
-    ↓
-Re-embedded and added to RAG vector store
-    ↓
-Next identical/similar query uses corrected context
+  -> log to mistake_store.json
+  -> re-embed the correction
+  -> upsert into vector DB
+  -> next similar query retrieves correct context
 ```
 
-This means: **the more people use it, the smarter it gets**, without full retraining.
-
 ---
 
-## 📊 Dialect Dataset (Phase 1 ✅)
+## Dataset
 
-| Dialect | Region | Balanced Rows |
+| Dialect | Region | Rows |
 |---|---|---|
-| Standard Gujarati | Ahmedabad / Gandhinagar | 500 ✅ |
-| Surti | Surat / South Gujarat | 500 ✅ |
-| Kathiawari | Rajkot / Saurashtra | 500 ✅ |
-| Charotari | Anand / Kheda | 500 ✅ |
+| Standard Gujarati | Ahmedabad / Gandhinagar | 500 |
+| Surti | Surat / South Gujarat | 500 |
+| Kathiawari | Rajkot / Saurashtra | 500 |
+| Charotari | Anand / Kheda | 500 |
 
-**Total: 2,000 rows — 500 per dialect — equal class weight for unbiased training**
+2,000 total — equal class weight, unbiased training.
 
 ---
 
-## 🗺️ Project Phases
+## Phases
 
 | Phase | Goal | Status |
 |---|---|---|
-| **Phase 1** | Data collection & balancing (2000 rows) | ✅ Done |
-| **Phase 2** | Dialect classifier (IndicBERT / MuRIL) | 🔜 Next |
-| **Phase 3** | RAG pipeline setup (FAISS + embeddings) | 🔜 Planned |
-| **Phase 4** | ASR fine-tuning (Whisper on dialect audio) | 🔜 Planned |
-| **Phase 5** | LLM fine-tuning + TTS integration | 🔜 Planned |
-| **Phase 6** | Self-learning loop (mistake → RAG update) | 🔜 Planned |
-| **Phase 7** | FastAPI backend + React frontend / App | 🔜 Planned |
+| 1 | Data collection and balancing | Done |
+| 2 | Dialect classifier (MuRIL) | Next |
+| 3 | RAG pipeline setup | Planned |
+| 4 | ASR fine-tuning (Whisper) | Planned |
+| 5 | LLM + RAG integration | Planned |
+| 6 | Self-learning loop | Planned |
+| 7 | TTS integration | Planned |
+| 8 | FastAPI backend + frontend | Planned |
 
 ---
 
-## 📁 Project Structure
+## Structure
 
 ```
-├── README.md
-├── .gitignore
-├── docs/
-│   ├── project_overview.md   ← detailed architecture doc
-│   └── total_lang.csv        ← dialect reference
 ├── data/
-│   ├── raw/                  ← dialect CSVs (500 rows each)
-│   ├── processed/            ← tokenized / encoded data
-│   └── combined/             ← train / val / test splits
-├── scrapers/
-│   ├── scrape_top4.py        ← 4-dialect YouTube scraper
-│   ├── balance_data.py       ← balance to 500/dialect
-│   ├── topup_gaps.py         ← fill shortfalls
-│   └── dialect_cleaner.py
+│   ├── raw/            dialect CSVs, 500 rows each
+│   ├── processed/      tokenized and encoded data
+│   └── combined/       train / val / test splits
+├── scrapers/           data collection and balancing scripts
 ├── src/
-│   ├── asr/                  ← Whisper fine-tuning
-│   ├── nlu/                  ← dialect classifier + intent
-│   ├── tts/                  ← Coqui/IndicTTS wrapper
-│   └── api/                  ← FastAPI backend
-├── models/                   ← saved checkpoints
-└── notebooks/                ← experiments & EDA
+│   ├── asr/
+│   ├── nlu/
+│   ├── tts/
+│   └── api/
+├── models/             saved checkpoints
+├── notebooks/          experiments and EDA
+└── docs/               architecture and planning docs
 ```
-
----
-
-*Version 2.0 | Updated: 2026-02-19*
