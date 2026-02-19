@@ -1,224 +1,228 @@
 # Gujarati Cross-Lingual Voice Assistant
-## Project Overview & Technical Documentation
+## Full Technical Documentation v2.0
 
 ---
 
 ## 1. Problem Statement
 
-Millions of Gujarati speakers speak in **regional dialects** (Surti, Kathiawari, Charotari, etc.) that differ significantly from Standard Gujarati. Existing speech AI systems are trained only on Standard Gujarati, making them:
+Millions of Gujarati speakers use regional dialects (Surti, Kathiawari, Charotari) that current speech AI systems fail to understand. Existing tools are biased toward Standard Gujarati, leaving dialect speakers without accessible AI tools.
 
-- **Inaccurate** for dialect speakers
-- **Inaccessible** to rural and non-urban populations
-- **Biased** toward urban, educated, formal speech
-
-**The gap:** A Surti speaker says *"Poyro kem cho?"* — a Standard Gujarati ASR fails to recognize it. A Kathiawari speaker says *"Shu chho?"* — wrong transcription. People who understand one Gujarati dialect but not another are left without tools.
+**Key challenge:** A Surti speaker saying *"Poyro kem cho?"* fails in standard Gujarati ASR. A person who understands one Gujarati dialect but not another has no way to bridge the gap today.
 
 ---
 
-## 2. Project Vision
+## 2. Vision
 
-> Build a **dialect-aware Gujarati voice assistant** that understands what the user says in *any* major Gujarati dialect, processes it intelligently, and responds back in clear speech or text.
-
-**Core idea in one sentence:**
-*User speaks in their dialect → AI understands it → AI thinks → AI responds in speech or text.*
+> Build a **dialect-aware Gujarati voice assistant** powered by RAG + LLM that understands dialect speech, thinks intelligently, responds in voice or text, and **learns from every mistake it makes**.
 
 ---
 
-## 3. System Architecture
+## 3. Full System Architecture
+
+### 3.1 Pipeline Overview
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    USER                             │
-│         speaks in Gujarati dialect                  │
-└──────────────────────┬──────────────────────────────┘
-                       │ voice input
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│            ASR  (Speech-to-Text)                    │
-│  Dialect-aware Whisper / wav2vec2 fine-tuned on:    │
-│  • Standard Gujarati  • Surti                       │
-│  • Kathiawari         • Charotari                   │
-│  Output: Gujarati text transcript                   │
-└──────────────────────┬──────────────────────────────┘
-                       │ text
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│            NLU  (Language Understanding)            │
-│  • Dialect identification (which dialect?)          │
-│  • Intent + entity extraction                       │
-│  • Normalize to Standard Gujarati for processing   │
-└──────────────────────┬──────────────────────────────┘
-                       │ normalized query
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│            AI BRAIN  (LLM / Response Gen)           │
-│  • Generates response in Standard Gujarati          │
-│  • Optionally translates back to user's dialect    │
-└──────────────────────┬──────────────────────────────┘
-                       │ response text
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│            TTS  (Text-to-Speech)                    │
-│  • Synthesizes Gujarati speech                      │
-│  • Dialect-appropriate pronunciation               │
-└──────────────────────┬──────────────────────────────┘
-                       │ audio / text
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│                    USER                             │
-│       receives AI response as speech or text        │
-└─────────────────────────────────────────────────────┘
+Voice Input (any dialect)
+    ↓
+[ASR] Speech-to-Text — Whisper fine-tuned on 4 Gujarati dialects
+    ↓
+[NLU] Dialect Identification — MuRIL/IndicBERT classifier
+    ↓
+[RAG] Context Retrieval — FAISS/ChromaDB vector store
+    ↓
+[LLM] Response Generation — IndicBERT / LLaMA 3
+    ↓
+[SELF-LEARNING] Mistake log → auto-update RAG knowledge base
+    ↓
+[TTS] Text-to-Speech — Coqui TTS / IndicTTS
+    ↓
+Voice or Text Response
 ```
 
+### 3.2 RAG Architecture (Retrieval-Augmented Generation)
+
+Instead of the model relying only on its weights, RAG retrieves real dialect knowledge at inference time:
+
+```
+User query text
+    │
+    ▼
+sentence-transformers  →  query embedding (768-dim vector)
+    │
+    ▼
+FAISS / ChromaDB       →  top-k similar chunks retrieved
+    │                      from dialect knowledge base
+    ▼
+Prompt construction    →  [CONTEXT: retrieved dialect chunks]
+                          [QUERY: user input]
+    │
+    ▼
+LLM (IndicBERT/LLaMA)  →  context-grounded response
+```
+
+**What the RAG knowledge base contains:**
+- 2,000 balanced dialect sentences (500 per dialect)
+- Dialect vocabulary mappings (e.g., Surti "poyro" = Standard "chokro")
+- Intent-response pairs per dialect
+- Error corrections from self-learning store
+
+### 3.3 Self-Learning from Mistakes
+
+The model improves continuously without full retraining:
+
+```python
+# Conceptual flow
+if user_corrects_response or confidence < THRESHOLD:
+    mistake = {
+        "input": original_query,
+        "wrong_output": model_response,
+        "correction": user_correction,
+        "dialect": detected_dialect,
+        "timestamp": now()
+    }
+    mistake_store.append(mistake)           # log the error
+    embedding = embed(mistake["correction"]) # re-embed correction
+    vector_db.upsert(embedding, mistake)    # inject into RAG
+    # Next time same query → correct context retrieved → correct answer
+```
+
+**Effect:** Every correction makes the model smarter for *all future users* with similar queries, without retraining.
+
 ---
 
-## 4. Dialects Supported (Phase 1)
+## 4. Technology Stack
 
-| Dialect | Region | Approx. Speakers | Script |
-|---|---|---|---|
-| Standard Gujarati | Ahmedabad, Gandhinagar | ~55M | Gujarati |
-| Surti | Surat, South Gujarat | ~8M | Gujarati |
-| Kathiawari | Rajkot, Saurashtra | ~15M | Gujarati |
-| Charotari | Anand, Kheda, Charotar | ~5M | Gujarati |
+### Core ML
+| Component | Tool | Notes |
+|---|---|---|
+| ASR | `openai/whisper-small` | Fine-tune on Gujarati dialect audio |
+| ASR alt | `facebook/wav2vec2-base` | Lower latency option |
+| Dialect ID | `google/muril-base-cased` | 17 Indian languages pretrained |
+| Embeddings | `sentence-transformers/paraphrase-multilingual` | Gujarati-aware embeddings |
+| Vector DB | `FAISS` (local) / `ChromaDB` (persistent) | RAG retrieval |
+| LLM | `ai4bharat/indic-gpt` or `LLaMA-3-8B` fine-tuned | Response generation |
+| TTS | `Coqui TTS` / `IndicTTS` | Gujarati speech synthesis |
 
----
-
-## 5. Data Collection (Completed)
-
-### Phase 1 — Scraping
-- **Source:** YouTube comments (via `youtube-comment-downloader` + `yt-dlp`)
-- **Method:** 3-phase: seed videos → auto search → regional news websites
-- **Quality filters:** Gujarati script ≥50%, length 15–300 chars, no spam/duplicates
-
-### Phase 2 — Balancing
-- Each dialect balanced to exactly **500 sentences**
-- Equal class weight → model does not lean toward any dialect
-- Files: `*_balanced.csv` in `data/raw/<Dialect>/`
-
-### Dataset Summary
-
-| Dialect | Raw | Balanced | Status |
-|---|---|---|---|
-| Standard Gujarati | 994 | 500 | ✅ |
-| Kathiawari | 479 | 500* | 🔄 top-up in progress |
-| Surti | 500 | 500* | 🔄 top-up in progress |
-| Charotari | 500 | 500* | 🔄 top-up in progress |
-
-**Total: 2,000 balanced training sentences**
-
----
-
-## 6. Technology Stack (Planned)
-
-| Layer | Technology |
+### Infrastructure
+| Component | Tool |
 |---|---|
-| **ASR** | OpenAI Whisper (fine-tuned) or Wav2Vec2 (gu) |
-| **Dialect ID** | FastText / IndicBERT / multilingual BERT |
-| **NLU / LLM** | IndicBERT, MuRIL, or fine-tuned LLaMA |
-| **TTS** | Coqui TTS / IndicTTS (Gujarati voice) |
-| **Backend API** | FastAPI (Python) |
-| **Frontend** | React / Next.js or mobile app |
+| Backend API | `FastAPI` + `Uvicorn` |
+| Frontend | `React` / `Next.js` |
+| Experiment tracking | `MLflow` or `Weights & Biases` |
+| Data versioning | `DVC` |
+| Containerization | `Docker` |
+
+### Data Collection (done ✅)
+| Tool | Purpose |
+|---|---|
+| `yt-dlp` | YouTube video discovery |
+| `youtube-comment-downloader` | Extract dialect comments |
+| `requests` + `BeautifulSoup` | Regional news site scraping |
 
 ---
 
-## 7. Model Training Plan
+## 5. Dataset
+
+### 5.1 What was collected
+| Dialect | Region | Balanced Rows | File |
+|---|---|---|---|
+| Standard Gujarati | Ahmedabad | 500 | `standard_gujarati_balanced.csv` |
+| Surti | Surat | 500 | `surti_balanced.csv` |
+| Kathiawari | Rajkot/Saurashtra | 500 | `kathiawari_balanced.csv` |
+| Charotari | Anand/Kheda | 500 | `charotari_balanced.csv` |
+
+**Total: 2,000 rows — equal class weight — model will not lean toward any dialect.**
+
+### 5.2 Quality filters applied
+- Gujarati script ratio ≥ 50%
+- Length: 15–300 characters
+- No duplicates
+- No spam (emoji-only, pure English, subscribe bait)
+
+---
+
+## 6. Model Training Plan
 
 ### Step 1 — Dialect Classifier
-- Input: Gujarati sentence (text)
-- Output: Dialect label (standard / surti / kathiawari / charotari)
-- Training data: `data/combined/combined_train.csv`
-- Model: Fine-tune IndicBERT or MuRIL
+- **Input:** Gujarati sentence (text)
+- **Output:** `standard` / `surti` / `kathiawari` / `charotari`
+- **Model:** Fine-tune `google/muril-base-cased`
+- **Data:** `data/combined/combined_train.csv`
+- **Metric:** F1 per class, overall accuracy
 
-### Step 2 — ASR Fine-tuning
-- Base: `openai/whisper-small` or `facebook/wav2vec2-base`
-- Fine-tune on Gujarati dialect audio data (to be collected)
-- Evaluation: WER (Word Error Rate) per dialect
+### Step 2 — RAG Knowledge Base Setup
+- Embed all 2,000 sentences using `sentence-transformers`
+- Index in FAISS (local) and ChromaDB (persistent)
+- Add dialect vocabulary mappings as additional documents
 
-### Step 3 — Response Generation
-- Use existing Gujarati LLM or fine-tune on dialect corpus
-- Normalize dialect → Standard → generate response
+### Step 3 — ASR Fine-tuning
+- **Base:** `openai/whisper-small`
+- **Data needed:** Gujarati dialect audio (to be recorded/crowdsourced)
+- **Metric:** WER (Word Error Rate) per dialect — target <15%
 
-### Step 4 — TTS
-- Use IndicTTS or Coqui TTS with Gujarati voice
-- Post-process for dialect-appropriate output
+### Step 4 — LLM Integration + RAG
+- Prompt = `[Context from RAG] + [User query]`
+- Model generates dialect-normalized response
+- Log all low-confidence outputs for self-learning
 
----
-
-## 8. Evaluation Metrics
-
-| Component | Metric |
-|---|---|
-| Dialect Classifier | Accuracy, F1 per class |
-| ASR | WER (Word Error Rate) per dialect |
-| End-to-End | User comprehension score (human eval) |
-| TTS | MOS (Mean Opinion Score) |
+### Step 5 — TTS
+- Gujarati Coqui TTS voice synthesis
+- Optionally adapt prosody for each dialect
 
 ---
 
-## 9. Project Phases
+## 7. Self-Learning Implementation
+
+### 7.1 Trigger conditions
+- User explicitly corrects the response
+- Model confidence score < 0.70
+- User rates response as "wrong" in UI
+
+### 7.2 Error store schema
+```json
+{
+  "id": "uuid",
+  "timestamp": "2026-02-19T20:00:00Z",
+  "dialect": "surti",
+  "input_text": "poyro kem cho bhai",
+  "model_output": "...",
+  "correction": "...",
+  "confidence": 0.42,
+  "embedded": true
+}
+```
+
+### 7.3 Update cycle
+- Errors embedded immediately (real-time RAG update)
+- Full model re-fine-tune: weekly batch job using accumulated errors
+
+---
+
+## 8. Project Phases
 
 | Phase | Goal | Status |
 |---|---|---|
-| **Phase 1** | Data collection & balancing | ✅ In progress |
-| **Phase 2** | Dialect classifier model | 🔜 Next |
-| **Phase 3** | ASR fine-tuning + audio data | 🔜 Planned |
-| **Phase 4** | End-to-end pipeline (ASR→NLU→LLM→TTS) | 🔜 Planned |
-| **Phase 5** | API + Frontend / App | 🔜 Planned |
+| **Phase 1** | Data collection & balancing | ✅ Done |
+| **Phase 2** | Dialect classifier (MuRIL) | 🔜 Next |
+| **Phase 3** | RAG pipeline (FAISS + embeddings) | 🔜 Planned |
+| **Phase 4** | ASR fine-tuning (Whisper) | 🔜 Planned |
+| **Phase 5** | LLM + RAG integration | 🔜 Planned |
+| **Phase 6** | Self-learning loop | 🔜 Planned |
+| **Phase 7** | TTS integration | 🔜 Planned |
+| **Phase 8** | FastAPI backend + Frontend | 🔜 Planned |
 
 ---
 
-## 10. File & Folder Structure
+## 9. Evaluation Metrics
 
-```
-Cross Lingual Project(gujarati)/
-│
-├── README.md                        ← quick start
-├── docs/
-│   └── project_overview.md          ← this file
-│
-├── data/
-│   ├── raw/                         ← dialect-specific scraped data
-│   │   ├── Standard Gujarati/
-│   │   │   ├── standard_gujarati_final.csv
-│   │   │   └── standard_gujarati_balanced.csv
-│   │   ├── Kathiawari/
-│   │   │   ├── kathiawari_final.csv
-│   │   │   └── kathiawari_balanced.csv
-│   │   ├── Surti/
-│   │   │   ├── surti_final.csv
-│   │   │   └── surti_balanced.csv
-│   │   └── Charotari/
-│   │       ├── charotari_final.csv
-│   │       └── charotari_balanced.csv
-│   ├── processed/                   ← cleaned, tokenized, encoded data
-│   └── combined/                    ← merged training splits
-│       ├── combined_train.csv       ← 80% (1600 rows)
-│       ├── combined_val.csv         ← 10% (200 rows)
-│       └── combined_test.csv        ← 10% (200 rows)
-│
-├── scrapers/                        ← data collection scripts
-│   ├── scrape_top4.py               ← main 4-dialect scraper
-│   ├── balance_data.py              ← equalizes to 500/dialect
-│   ├── topup_gaps.py                ← fills shortfalls
-│   └── dialect_cleaner.py           ← strict post-cleaner
-│
-├── notebooks/                       ← Jupyter exploration
-│   └── (EDA, quality checks, model experiments)
-│
-├── src/                             ← application source code
-│   ├── asr/                         ← Speech-to-Text module
-│   ├── nlu/                         ← Dialect ID + understanding
-│   ├── tts/                         ← Text-to-Speech module
-│   └── api/                         ← FastAPI backend
-│
-├── models/                          ← saved model checkpoints
-│   ├── asr/
-│   ├── nlu/
-│   └── tts/
-│
-└── total_lang.csv                   ← full dialect reference table
-```
+| Component | Metric | Target |
+|---|---|---|
+| Dialect Classifier | F1 per dialect | > 0.85 |
+| ASR | WER per dialect | < 15% |
+| RAG retrieval | Precision@k | > 0.80 |
+| End-to-end | Human comprehension score | > 80% |
+| TTS | MOS (Mean Opinion Score) | > 3.5/5.0 |
 
 ---
 
-*Document version: 1.0 | Created: 2026-02-19*
+*Version 2.0 | 2026-02-19*
