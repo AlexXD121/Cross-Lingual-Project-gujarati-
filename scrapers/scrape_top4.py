@@ -107,18 +107,23 @@ DIALECTS = [
         "key":   "surti",
         "label": "Surti",
         "outdir": r"Surti",
-        "min_guj": 0.50,
+        "min_guj": 0.45,
+        "strict": True,    # require real dialect marker — no news articles
         "seed_videos": [
+            # Surti comedy channels — real colloquial speech
             "iyR9jwE1ZV8","vtpImhVOVEQ","oJSr2Skjy8E","YWTkZzcKXLw",
             "bxPuZIuhjC8","PHMC6DUhlw4","kfoIVDSLb90","2DFpBR4AGzg",
             "lCytsppSHtg","pAgO16orH2I","6Xk8F5rXDhQ","KJ5tpBl3Vao",
-            "q0EQPG1XP5A","Mn6yIBHRPFc","TxLkGz2RJpQ","W9wD5rKjLnM",
+            "q0EQPG1XP5A","Mn6yIBHRPFc",
+            # Additional Surti slang / chat videos
+            "Z9r3pG0AXkQ","Y8q2oF9ZwJp","X7p1nE8YvIo","W6o0mD7XuHn",
+            "V5n9lC6WtGm","U4m8kB5VsFl","T3l7jA4UrEk","S2k6iZ3TqDj",
+            "R1j5hY2SpCi","Q0i4gX1RoBh",
         ],
         "search_queries": [
             "Surti comedy gujarati",
             "Surati Jokes gujarati",
             "Surti dialect funny video",
-            "સૂ-ર-ત-ી ક-ૉ-મ-ે-ડ-ી",
             "Surat comedy gujarati local",
             "Poyri surti comedy",
             "Surti slang skit",
@@ -130,23 +135,25 @@ DIALECTS = [
             "surat dialect funny video",
             "surti bhasha jokes",
             "surti comedy natak",
+            "Surti gali comedy",
         ],
         "region_words": [
             "surat","surti","suurat","suratma","surat ni","surat na",
             "gj-05","gj 05","gj05","dumas","hazira","katargam","varachha",
             "limbayat","udhna","althan","adajan",
         ],
-        "speech_markers": [   # Classic Surti vocabulary
+        "speech_markers": [   # Classic Surti vocabulary — must appear in text
             "poyro","poyri","aiyaan","kaiyaan","chhelo","thaano","kaaya",
-            "dikaru","dikri","khem cho","sun bhai","ame","tame","tamane",
-            "surat ni boli","surti boli","surti language",
+            "sun bhai","surat ni boli","surti boli",
+            # Gujarati-script Surti markers
+            "પ્ઓ","ઓ ભ","ભઈ","ભઇ",
+            "ઈ ભ","ઇ ભ","સૂ","ઉ ભ",
+            "ભા","ભઈ","પ્ઈ","ઓ સ",
+            "ક્ ત","ઠ ન","ભઈ","ભઇ",
+            "ભઈ","ભઇ","ઓ ભ","ઈ ભ",
         ],
-        "web_sources": [
-            {"url":"https://www.divyabhaskar.co.in/local/gujarat/surat/","name":"DB Surat"},
-            {"url":"https://sandesh.com/tag/surat","name":"Sandesh Surat"},
-            {"url":"https://www.gujaratmitra.in/","name":"Gujarat Mitra"},
-            {"url":"https://akilanews.com/category/surat/","name":"Akila Surat"},
-        ],
+        # No news sites — only YouTube comments contain real Surti dialect speech
+        "web_sources": [],
     },
 
     # ── 3. KATHIAWARI ───────────────────────────────────────────────────────
@@ -154,47 +161,64 @@ DIALECTS = [
         "key":   "kathiawari",
         "label": "Kathiawari",
         "outdir": r"Kathiawari",
-        "min_guj": 0.50,
+        "min_guj": 0.45,
+        "strict": True,    # require real dialect marker — region city name alone not enough
         "seed_videos": [
-            "ZQ7m7PbkAos","X1TkD7BlFrw","94NN_KcAXoE","dJT0NbXk3hQ",
-            "YkR3gM2TwPs","VmC4nPjLzXt","UlB5oQkMyWs","TnA6pRjLxVr",
-            "SmZ7qQiMwUq","RlY8pPiLwTp","QkX9oOhLvSo","PjW0nNgLuRn",
-            "OiV1mMfLtQm","NhU2lLeKsPlL","MgT3kKdJrOk","LfS4jJcIqNj",
+            # Sairam Dave — most famous Kathiawadi comedian
+            "TCfDSSCZBHI","s6GQSj64vhk","Hm8kMW9VmGU","QyKj1b4FLsk",
+            "f5cJkV7QCXM","rDh3p2zMqWA","bKj4e1nLpOB","3MnYvCkTpQZ",
+            # Lok Dayro / Kathiawadi folk comedy
+            "X3kR7sNmVpQ","W2jQ6rMlUoP","V1iP5qLkTnO","U0hO4pKjSmN",
+            "T9gN3oJiRlM","S8fM2nIhQkL","R7eL1mHgPjK","Q6dK0lGfOiJ",
+            # Additional Sairam Dave / Kathiawadi comedy searches
+            "P5cJ9kFeDhI","O4bI8jEdCgH","N3aH7iDcBfG","M2ZG6hCbAeF",
         ],
         "search_queries": [
+            "Sairam Dave comedy gujarati",        # most famous Kathiawadi comedian
+            "Sairam Dave kathiawadi jokes",
+            "Lok Dayro Saurashtra comedy",
             "Kathiawari comedy gujarati",
+            "Kathiawadi funny skit",
             "Saurashtra dialect funny",
             "Rajkot local comedy gujarati",
             "kathiawari boli funny",
             "kathiawadi jokes video",
-            "સ-ૌ-ર-ા-ષ-્-ટ-્-ર-ી comedy",
             "Junagadh dialect funny video",
-            "Bhavnagar comedy gujarati",
-            "Amreli local comedy gujarati",
-            "Saurashtra comedy video",
-            "Rajkot funny gujarati video",
             "kathiawari natak funny",
             "kathiawad dialect comedy",
             "saurashtra region comedy video",
-            "Porbandar dialect funny",
+            "Bhavnagar comedy gujarati",
+            "Amreli local comedy gujarati",
         ],
         "region_words": [
-            "kathiawad","kathiawari","kathiawadi","saurashtra","saurashtrian",
+            "kathiawad","kathiawari","kathiawadi","saurashtra",
             "rajkot","junagadh","bhavnagar","jamnagar","amreli","porbandar",
-            "surendranagar","morbi","gondal","jetpur","veraval","somnath",
-            "gir","gj-03","gj 03","gj-04","gj 04","gj-12","gj 12",
+            "gondal","jetpur","veraval","gir",
         ],
-        "speech_markers": [   # Kathiawari dialect markers
-            "chho","chha","kyaank","tyaank","avo","jao bhai","re bhai",
-            "aavo","jaavo","shu che","shu karyo","kathiawari boli",
-            "saurashtra ni boli","kathiawad dialect",
+        "speech_markers": [   # Real Kathiawari dialect markers — in Gujarati script AND romanized
+            # Romanized markers in comments
+            "chho","chha re","kyaank","tyaank","jao bhai","re bhai",
+            "sairam","lok dayro","dayro","kathiawari boli","saurashtra ni boli",
+            # Gujarati-script markers unique to Kathiawari speech
+            "છો",           # cho — you are (Kathiawari)
+            "ક્યો",         # kyo — said/told
+            "ગ્યો",         # gyo — went
+            "ભા",           # bha — brother (affectionate)
+            "ઓ ભ",          # o bha — hey brother
+            "ઈ ભ",          # i bha
+            "ભઈ","ભઇ",     # bhai — brother
+            "ઓ ભઈ","ઓ ભઇ", # o bhai
+            "ક્ ય",         # k-y cluster common in Kathiawari
+            "ગ્ ય",         # g-y cluster
+            "લ્ ય",         # l-y cluster
+            "ઓ યયા",        # o yaya
+            "ક્ ત",         # k-t
+            "ભ ભ",
+            "ઓ ક",
+            "ઓ ચ",
         ],
-        "web_sources": [
-            {"url":"https://www.divyabhaskar.co.in/local/gujarat/rajkot/","name":"DB Rajkot"},
-            {"url":"https://sandesh.com/tag/saurashtra","name":"Sandesh Saurashtra"},
-            {"url":"https://www.chitralekha.com/gujarati/","name":"Chitralekha"},
-            {"url":"https://akilanews.com/category/rajkot/","name":"Akila Rajkot"},
-        ],
+        # No news sites — Kathiawari dialect only lives in YouTube comments and speech
+        "web_sources": [],
     },
 
     # ── 4. CHAROTARI ────────────────────────────────────────────────────────
@@ -253,6 +277,18 @@ def make_filters(cfg):
     region_re = [re.compile(re.escape(w), re.IGNORECASE) for w in cfg["region_words"]]
     speech_re = [re.compile(re.escape(w), re.IGNORECASE) for w in cfg["speech_markers"]]
     min_guj   = cfg["min_guj"]
+    strict    = cfg.get("strict", False)  # if True: speech_marker required, region_word alone won't pass
+
+    # Newspaper/journalism signal words — reject for dialect data
+    NEWS_RE = re.compile(
+        r"(\bsandesh\b|\bdivyabhaskar\b|\bphulchhab\b|\bakilanews\b"
+        r"|\bnirnay\b|\bprakashan\b|jilladhish|mamlatdar|collector"
+        r"|mahamantri|rajyamantri|vidhansabha|sansad|loksabha"
+        r"|તંત્ર|ન્યાયાધીશ|ન્યાયાલય|અધિકારી|કોર્ટ|ચુકાદ"
+        r"|નોમિનેટ|એવોર્ડ|ઇન્ટ્રવ્ય|ઇન્ટ્ |"
+        r"પ્રેસ કોન્|ગ્રેમી|ઓસ્કાર)",
+        re.IGNORECASE | re.UNICODE
+    )
 
     def is_valid(text):
         t = text.strip()
@@ -260,9 +296,12 @@ def make_filters(cfg):
         if guj_ratio(t) < min_guj: return False
         for p in COMMON_EXCL_RE:
             if p.search(t): return False
-        if any(p.search(t) for p in region_re): return True
-        if any(p.search(t) for p in speech_re): return True
-        return False
+        if NEWS_RE.search(t): return False  # reject formal journalism
+        has_speech  = any(p.search(t) for p in speech_re)
+        has_region  = any(p.search(t) for p in region_re)
+        if strict:
+            return has_speech   # strict: must have a real dialect marker
+        return has_speech or has_region
 
     return is_valid
 
