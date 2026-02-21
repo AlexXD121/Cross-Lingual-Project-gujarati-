@@ -156,70 +156,7 @@ DIALECTS = [
         "web_sources": [],
     },
 
-    # ── 3. KATHIAWARI ───────────────────────────────────────────────────────
-    {
-        "key":   "kathiawari",
-        "label": "Kathiawari",
-        "outdir": r"Kathiawari",
-        "min_guj": 0.45,
-        "strict": True,    # require real dialect marker — region city name alone not enough
-        "seed_videos": [
-            # Sairam Dave — most famous Kathiawadi comedian
-            "TCfDSSCZBHI","s6GQSj64vhk","Hm8kMW9VmGU","QyKj1b4FLsk",
-            "f5cJkV7QCXM","rDh3p2zMqWA","bKj4e1nLpOB","3MnYvCkTpQZ",
-            # Lok Dayro / Kathiawadi folk comedy
-            "X3kR7sNmVpQ","W2jQ6rMlUoP","V1iP5qLkTnO","U0hO4pKjSmN",
-            "T9gN3oJiRlM","S8fM2nIhQkL","R7eL1mHgPjK","Q6dK0lGfOiJ",
-            # Additional Sairam Dave / Kathiawadi comedy searches
-            "P5cJ9kFeDhI","O4bI8jEdCgH","N3aH7iDcBfG","M2ZG6hCbAeF",
-        ],
-        "search_queries": [
-            "Sairam Dave comedy gujarati",        # most famous Kathiawadi comedian
-            "Sairam Dave kathiawadi jokes",
-            "Lok Dayro Saurashtra comedy",
-            "Kathiawari comedy gujarati",
-            "Kathiawadi funny skit",
-            "Saurashtra dialect funny",
-            "Rajkot local comedy gujarati",
-            "kathiawari boli funny",
-            "kathiawadi jokes video",
-            "Junagadh dialect funny video",
-            "kathiawari natak funny",
-            "kathiawad dialect comedy",
-            "saurashtra region comedy video",
-            "Bhavnagar comedy gujarati",
-            "Amreli local comedy gujarati",
-        ],
-        "region_words": [
-            "kathiawad","kathiawari","kathiawadi","saurashtra",
-            "rajkot","junagadh","bhavnagar","jamnagar","amreli","porbandar",
-            "gondal","jetpur","veraval","gir",
-        ],
-        "speech_markers": [   # Real Kathiawari dialect markers — in Gujarati script AND romanized
-            # Romanized markers in comments
-            "chho","chha re","kyaank","tyaank","jao bhai","re bhai",
-            "sairam","lok dayro","dayro","kathiawari boli","saurashtra ni boli",
-            # Gujarati-script markers unique to Kathiawari speech
-            "છો",           # cho — you are (Kathiawari)
-            "ક્યો",         # kyo — said/told
-            "ગ્યો",         # gyo — went
-            "ભા",           # bha — brother (affectionate)
-            "ઓ ભ",          # o bha — hey brother
-            "ઈ ભ",          # i bha
-            "ભઈ","ભઇ",     # bhai — brother
-            "ઓ ભઈ","ઓ ભઇ", # o bhai
-            "ક્ ય",         # k-y cluster common in Kathiawari
-            "ગ્ ય",         # g-y cluster
-            "લ્ ય",         # l-y cluster
-            "ઓ યયા",        # o yaya
-            "ક્ ત",         # k-t
-            "ભ ભ",
-            "ઓ ક",
-            "ઓ ચ",
-        ],
-        # No news sites — Kathiawari dialect only lives in YouTube comments and speech
-        "web_sources": [],
-    },
+
 
     # ── 4. CHAROTARI ────────────────────────────────────────────────────────
     {
@@ -310,7 +247,7 @@ def search_videos(q, n=20):
     try:
         r = subprocess.run(
             ["yt-dlp", f"ytsearch{n}:{q}", "--get-id", "--no-warnings", "-q"],
-            capture_output=True, text=True, timeout=30
+            capture_output=True, text=True, timeout=90
         )
         ids = [l.strip() for l in r.stdout.strip().splitlines() if l.strip()]
         print(f"    yt-dlp '{q[:50]}' → {len(ids)} videos")

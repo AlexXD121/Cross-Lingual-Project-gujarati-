@@ -78,13 +78,6 @@ DIALECTS = [
         "strategy": "trim",          # pick best 500 from 994
     },
     {
-        "key":    "kathiawari",
-        "label":  "Kathiawari",
-        "outdir": "Kathiawari",
-        "source": "kathiawari_final.csv",
-        "strategy": "all",           # take all that pass quality, flag if <500
-    },
-    {
         "key":    "surti",
         "label":  "Surti",
         "outdir": "Surti",

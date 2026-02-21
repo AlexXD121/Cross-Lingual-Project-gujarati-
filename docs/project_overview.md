@@ -5,7 +5,7 @@
 
 ## 1. Problem Statement
 
-Millions of Gujarati speakers use regional dialects (Surti, Kathiawari, Charotari) that current speech AI systems fail to understand. Existing tools are biased toward Standard Gujarati, leaving dialect speakers without accessible AI tools.
+Millions of Gujarati speakers use regional dialects (Surti, Charotari) that current speech AI systems fail to understand. Existing tools are biased toward Standard Gujarati, leaving dialect speakers without accessible AI tools.
 
 **Key challenge:** A Surti speaker saying *"Poyro kem cho?"* fails in standard Gujarati ASR. A person who understands one Gujarati dialect but not another has no way to bridge the gap today.
 
@@ -24,7 +24,7 @@ Millions of Gujarati speakers use regional dialects (Surti, Kathiawari, Charotar
 ```
 Voice Input (any dialect)
     ↓
-[ASR] Speech-to-Text — Whisper fine-tuned on 4 Gujarati dialects
+[ASR] Speech-to-Text — Whisper fine-tuned on 3 Gujarati dialects
     ↓
 [NLU] Dialect Identification — MuRIL/IndicBERT classifier
     ↓
@@ -61,7 +61,7 @@ LLM (IndicBERT/LLaMA)  →  context-grounded response
 ```
 
 **What the RAG knowledge base contains:**
-- 2,000 balanced dialect sentences (500 per dialect)
+- 1,482 balanced dialect sentences (494 per dialect)
 - Dialect vocabulary mappings (e.g., Surti "poyro" = Standard "chokro")
 - Intent-response pairs per dialect
 - Error corrections from self-learning store
@@ -126,12 +126,11 @@ if user_corrects_response or confidence < THRESHOLD:
 ### 5.1 What was collected
 | Dialect | Region | Balanced Rows | File |
 |---|---|---|---|
-| Standard Gujarati | Ahmedabad | 500 | `standard_gujarati_balanced.csv` |
-| Surti | Surat | 500 | `surti_balanced.csv` |
-| Kathiawari | Rajkot/Saurashtra | 500 | `kathiawari_balanced.csv` |
-| Charotari | Anand/Kheda | 500 | `charotari_balanced.csv` |
+| Standard Gujarati | Ahmedabad | 494 | `standard_gujarati_balanced.csv` |
+| Surti | Surat | 494 | `surti_balanced.csv` |
+| Charotari | Anand/Kheda | 494 | `charotari_balanced.csv` |
 
-**Total: 2,000 rows — equal class weight — model will not lean toward any dialect.**
+**Total: 1,482 rows — equal class weight — model will not lean toward any dialect.**
 
 ### 5.2 Quality filters applied
 - Gujarati script ratio ≥ 50%
@@ -145,13 +144,14 @@ if user_corrects_response or confidence < THRESHOLD:
 
 ### Step 1 — Dialect Classifier
 - **Input:** Gujarati sentence (text)
-- **Output:** `standard` / `surti` / `kathiawari` / `charotari`
+- **Output:** `standard` / `surti` / `charotari`
 - **Model:** Fine-tune `google/muril-base-cased`
-- **Data:** `data/combined/combined_train.csv`
+- **Data:** `data/combined/gujarati_dialects.csv`
 - **Metric:** F1 per class, overall accuracy
+- **Status:** **Completed.** Achieved Weighted F1 of 0.834 (Standard 0.98, Surti 0.80, Charotari 0.72).
 
 ### Step 2 — RAG Knowledge Base Setup
-- Embed all 2,000 sentences using `sentence-transformers`
+- Embed all 1,482 sentences using `sentence-transformers`
 - Index in FAISS (local) and ChromaDB (persistent)
 - Add dialect vocabulary mappings as additional documents
 
@@ -203,7 +203,7 @@ if user_corrects_response or confidence < THRESHOLD:
 | Phase | Goal | Status |
 |---|---|---|
 | 1 | Data collection and balancing | Done |
-| 2 | Dialect classifier (MuRIL) | Next |
+| 2 | Dialect classifier (MuRIL) | Done |
 | 3 | RAG pipeline (FAISS + embeddings) | Planned |
 | 4 | ASR fine-tuning (Whisper) | Planned |
 | 5 | LLM + RAG integration | Planned |

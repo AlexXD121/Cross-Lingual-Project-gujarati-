@@ -47,11 +47,6 @@ DIALECTS = [
         "file":  os.path.join(BASE_RAW, "Standard Gujarati", "standard_gujarati_balanced.csv"),
     },
     {
-        "key":   "kathiawari",
-        "label": "Kathiawari",
-        "file":  os.path.join(BASE_RAW, "Kathiawari", "kathiawari_balanced.csv"),
-    },
-    {
         "key":   "surti",
         "label": "Surti",
         "file":  os.path.join(BASE_RAW, "Surti", "surti_balanced.csv"),

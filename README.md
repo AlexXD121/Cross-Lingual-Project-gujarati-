@@ -11,7 +11,7 @@ flowchart TD
     A([User speaks in any Gujarati dialect]) --> B
 
     subgraph ASR["ASR — Speech to Text"]
-        B[Whisper / Wav2Vec2\nfine-tuned on 4 dialects]
+        B[Whisper / Wav2Vec2\nfine-tuned on 3 dialects]
     end
 
     B --> C
@@ -87,7 +87,7 @@ User query
   -> LLM generates a grounded answer
 ```
 
-The RAG knowledge base includes the 2,000 balanced dialect sentences, dialect vocabulary mappings, and corrections accumulated through the self-learning loop.
+The RAG knowledge base includes the 1,482 balanced dialect sentences, dialect vocabulary mappings, and corrections accumulated through the self-learning loop.
 
 ---
 
@@ -109,12 +109,17 @@ Low confidence or user correction
 
 | Dialect | Region | Rows |
 |---|---|---|
-| Standard Gujarati | Ahmedabad / Gandhinagar | 500 |
-| Surti | Surat / South Gujarat | 500 |
-| Kathiawari | Rajkot / Saurashtra | 500 |
-| Charotari | Anand / Kheda | 500 |
+| Standard Gujarati | Ahmedabad / Gandhinagar | ~500 |
+| Surti | Surat / South Gujarat | ~500 |
+| Charotari | Anand / Kheda | ~500 |
 
-2,000 total — equal class weight, unbiased training.
+~1,500 total (1,482) — equal class weight, unbiased training.
+
+### Current Model Performance (Dialect Classifier)
+- **Standard Gujarati:** 0.98 F1
+- **Surti:** 0.80 F1
+- **Charotari:** 0.72 F1
+- **Overall Weighted F1:** **0.83**
 
 ---
 
@@ -123,7 +128,7 @@ Low confidence or user correction
 | Phase | Goal | Status |
 |---|---|---|
 | 1 | Data collection and balancing | Done |
-| 2 | Dialect classifier (MuRIL) | Next |
+| 2 | Dialect classifier (MuRIL) | Done |
 | 3 | RAG pipeline setup | Planned |
 | 4 | ASR fine-tuning (Whisper) | Planned |
 | 5 | LLM + RAG integration | Planned |
