@@ -154,6 +154,7 @@ if user_corrects_response or confidence < THRESHOLD:
 - Embed all 1,482 sentences using `sentence-transformers`
 - Index in FAISS (local) and ChromaDB (persistent)
 - Add dialect vocabulary mappings as additional documents
+- **Status:** **Completed.** FAISS index built using `google/muril-base-cased` embeddings.
 
 ### Step 3 — ASR Fine-tuning
 - **Base:** `openai/whisper-small`
@@ -204,7 +205,7 @@ if user_corrects_response or confidence < THRESHOLD:
 |---|---|---|
 | 1 | Data collection and balancing | Done |
 | 2 | Dialect classifier (MuRIL) | Done |
-| 3 | RAG pipeline (FAISS + embeddings) | Planned |
+| 3 | RAG pipeline (FAISS + embeddings) | Done |
 | 4 | ASR fine-tuning (Whisper) | Planned |
 | 5 | LLM + RAG integration | Planned |
 | 6 | Self-learning loop | Planned |

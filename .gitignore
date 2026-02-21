@@ -8,3 +8,5 @@ data/raw/**/*.json
 models/nlu/checkpoints/
 models/nlu/dialect_classifier/*.safetensors
 models/nlu/dialect_classifier/optimizer.pt
+models/rag/*.faiss
+models/rag/*.pkl

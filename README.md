@@ -129,7 +129,7 @@ Low confidence or user correction
 |---|---|---|
 | 1 | Data collection and balancing | Done |
 | 2 | Dialect classifier (MuRIL) | Done |
-| 3 | RAG pipeline setup | Planned |
+| 3 | RAG pipeline setup | Done |
 | 4 | ASR fine-tuning (Whisper) | Planned |
 | 5 | LLM + RAG integration | Planned |
 | 6 | Self-learning loop | Planned |
